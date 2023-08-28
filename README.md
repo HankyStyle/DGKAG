@@ -1,6 +1,6 @@
 # DG-KAG: Distractor Generation using Language Models with Knowledge Augmented Generation
 
-This repo provides the source code & data of our paper: DG-KAG:Boosting Distractor Generation via Knowledge Triplet Augmentation.
+This repo provides the source code & data of our paper : DG-KAG:Boosting Distractor Generation via Knowledge Triplet Augmentation.
 
 <!-- This repo provides the source code & data of our paper: [DG-KAG:Boosting Distractor Generation via Knowledge Triplet Augmentation](link) (EMNLP 2023?). -->
 
@@ -83,14 +83,18 @@ The resulting file structure will look like:
         └── sciq/
 ├── saved_models/
 ├── predictions/
-├── eval/                      (eval model)
-    ├── eval_mcq.py
-    └── eval_sciq.py
+├── eval/                      (eval model predictions)
+    ├── evaluate_mcq.py
+    └── evaluate_sciq.py
 └── tutorial_material/         (some tutorial stuff)
 ```
 
 ### 2. Train DG-KAG
 For MCQ and Sciq, run juypter notebook in modeling folder
+
+1. Reranker : Model Training Juypter Notebook for KAG Component - Triplet Reranker
+* Need Triplet Reranker Model to Construct KAG
+2. KAG : Model Training Juypter Notebook for KAG
 
 
 ### 3. Evaluate trained model
@@ -125,8 +129,8 @@ Sciq
   </tr>
   <tr>
     <th>T5 Triplet Augmentation(with only answer triplet)</th>
-    <th>16.91</th>
-    <th>32.86</th>
+    <th>16.50</th>
+    <th>32.39</th>
   </tr>
 </table>
 

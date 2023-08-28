@@ -38,6 +38,9 @@ cpnet = None
 cpnet_all = None
 cpnet_simple = None
 
+
+
+
 input_paths = {
     'mcq': {
         'grounded':{
@@ -127,7 +130,7 @@ def load_cpnet(cpnet_graph_path):
         else:
             cpnet_simple.add_edge(u, v, weight=w)
 
-def read_candidate_data(candidate_path):
+def read_generative_candidate_data(candidate_path):
     with open(candidate_path) as f:
         candidate_data = json.load(f)
     return candidate_data
@@ -192,11 +195,6 @@ def append_extra_node_use_LM(data):
     return (sorted(qc_ids), sorted(ac_ids), question, extra_nodes)
 
 def retrieve_triplet_from_KG_generative_lm(grounded_path, candidate_path, output_path):
-    # 載入 concept2id, id2relation, relation2id
-    if any(x is None for x in [concept2id, id2concept, relation2id, id2relation]):
-        load_resources(cpnet_vocab_path)
-    if cpnet is None or cpnet_simple is None:
-        load_cpnet(cpnet_graph_path)
 
     qa_data = []
     with open(grounded_path, 'r', encoding='utf-8') as fin_ground:
@@ -210,10 +208,10 @@ def retrieve_triplet_from_KG_generative_lm(grounded_path, candidate_path, output
             QAcontext = "{}.[SEP] {}.".format(sentence, dic['ans'])
             qa_data.append((q_ids, a_ids, QAcontext))
     
-    candidate_data = read_candidate_data(candidate_path)
+    generative_candidate_data = read_generative_candidate_data(candidate_path)
 
     for i in range(len(qa_data)):
-        candidate = candidate_data[i]['candidate_set']
+        candidate = generative_candidate_data[i]['candidate_set']
         pred = []
         for words in candidate:
             words = str(words)
@@ -278,12 +276,20 @@ def concepts_to_adj_matrices_1hop_all_pair__use_LM(data):
     triplets = concepts2adj(qc_ids + ac_ids,extra_nodes_ids)
     return {'triplets': triplets}
 
+def concepts_to_adj_matrices_2hop_all_pair__use_LMs(data):
+    qc_ids = data[0]
+    ac_ids = data[1]
+    question = data[2]
+    distractors_set = data[3:]
+    extra_nodes = []
+    for distractor in distractors_set:
+        if distractor in concept2id:
+            extra_nodes_ids = concept2id[distractor] 
+            extra_nodes.append(extra_nodes_ids)
+    return (sorted(qc_ids), sorted(ac_ids), question, extra_nodes)
+
 def retrieve_triplet_from_KG_masked_lm(grounded_path, output_path):
-    # 載入 concept2id, id2relation, relation2id
-    if any(x is None for x in [concept2id, id2concept, relation2id, id2relation]):
-        load_resources(cpnet_vocab_path)
-    if cpnet is None or cpnet_simple is None:
-        load_cpnet(cpnet_graph_path)
+
 
 
     qa_data = []
@@ -324,8 +330,79 @@ def retrieve_triplet_from_KG_masked_lm(grounded_path, output_path):
     with open(output_path, 'w') as fout:
         json.dump(res3, fout)
     print(f'data saved to {output_path}')
+
+
+def retrieve_triplet_from_KG_masked_generate_lm(grounded_path, candidate_path, output_path):
     
+    qa_data = []
+    with open(grounded_path, 'r', encoding='utf-8') as fin_ground:
+        lines_ground = fin_ground.readlines()
+        for j, line in enumerate(lines_ground):
+            dic = json.loads(line)
+            q_ids = set(concept2id[c] for c in dic['qc'])
+            a_ids = set(concept2id[c] for c in dic['ac'])
+            q_ids = q_ids - a_ids
+            sentence = dic['sent'].replace(dic['ans'],'[MASK]')
+            QAcontext = "{}.[SEP] {}.".format(sentence, dic['ans'])
+            qa_data.append((q_ids, a_ids, QAcontext))
+    print('總共有',len(qa_data),'筆')
+
+    generative_candidate_data = read_generative_candidate_data(candidate_path)
+
+    # Append Generative Candidate into Data
+    for i in range(len(qa_data)):
+        
+        candidate = generative_candidate_data[i]['candidate_set']
+        pred = []
+        for x in candidate:
+            pred.append(x.lower())
+        qa_data[i] = qa_data[i] + tuple(pred[:10])
+    
+    # Append Masked LM Candidate into Data
+    for i in range(len(qa_data)):
+        sentence = generative_candidate_data[i]['sentence'].replace('**blank**','[MASK]')
+        pred = []
+        mlm_distractors_set = unmasker(sentence)
+        if len(mlm_distractors_set) < 5:
+            for each_distractor_set in mlm_distractors_set:
+                for distractor in each_distractor_set:
+                    if distractor['token_str'] not in qa_data[i]:
+                        pred.append(distractor['token_str'].lower())
+        else:
+            for distractor in mlm_distractors_set:
+                if distractor['token_str'] not in qa_data[i]:
+                    pred.append(distractor['token_str'].lower())
+    qa_data[i] = qa_data[i] + tuple(pred[:10])
+
+    res1 = list(tqdm(map(concepts_to_adj_matrices_2hop_all_pair__use_LMs, qa_data), total=len(qa_data)))
+    res2 = list(tqdm(map(extract_triplet, res1), total=len(res1)))
+
+    res3 = []
+
+    for item in tqdm(res2):
+        temp_list = []
+        for triplets in item['triplets']:
+            rel, source_node, target_node, weight = triplets
+            relation = id2relation[rel]
+            source = id2concept[source_node]
+            target = id2concept[target_node]
+            temp_list.append([relation, source, target, weight])
+        res3.append(temp_list)
+
+
+    with open(output_path, 'w') as fout:
+        json.dump(res3, fout)
+    print(f'data saved to {output_path}')
+
 def main():
+
+    # 載入 concept2id, id2relation, relation2id
+    if any(x is None for x in [concept2id, id2concept, relation2id, id2relation]):
+        load_resources(cpnet_vocab_path)
+    if cpnet is None or cpnet_simple is None:
+        load_cpnet(cpnet_graph_path)
+
+
     # MCQ Retrieving
     print(f'retrieving train dataset triplet (generate_lm) from KG: \n')
     retrieve_triplet_from_KG_generative_lm(input_paths['mcq']['grounded']['train'], input_paths['mcq']['candidate_set']['generate_lm']['train'], output_paths['mcq']['triplets']['generate_lm']['train'])
@@ -337,7 +414,11 @@ def main():
     print(f'retrieving test dataset triplet (masked_lm) from KG: \n')
     retrieve_triplet_from_KG_masked_lm(input_paths['mcq']['grounded']['test'], output_paths['mcq']['triplets']['masked_lm']['test'])
 
-    # Sciq Retrieving
+    print(f'retrieving train dataset triplet (masked_lm + generate_lm) from KG: \n')
+    retrieve_triplet_from_KG_masked_generate_lm(input_paths['mcq']['grounded']['train'], input_paths['mcq']['candidate_set']['generate_lm']['train'], output_paths['mcq']['triplets']['generate_masked_lm']['train'])
+    print(f'retrieving test dataset triplet (masked_lm + generate_lm) from KG: \n')
+    retrieve_triplet_from_KG_masked_generate_lm(input_paths['mcq']['grounded']['test'], input_paths['mcq']['candidate_set']['generate_lm']['test'], output_paths['mcq']['triplets']['generate_masked_lm']['test'])
+    
 
 if __name__ == '__main__':
     main()
