@@ -149,3 +149,11 @@ QA-GNN: Question Answering using Language Models and Knowledge Graphs. Michihiro
 https://github.com/michiyasunaga/qagnn
 ```
 Many thanks to the authors and developers!
+
+### 以上是這篇論文程式碼介紹 如果對於這個 Repo 有疑問的地方 或是 想與我更進一步的討論 歡迎寄信至 boy19990222@gmail.com.tw
+
+## Credit
+
+- [HankyStyle](https://github.com/HankyStyle)
+- 范耀中教授
+- 參考網站 : https://github.com/michiyasunaga/qagnn
