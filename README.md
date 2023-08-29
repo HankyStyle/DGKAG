@@ -93,7 +93,9 @@ The resulting file structure will look like:
 For MCQ and Sciq, run juypter notebook in modeling folder
 
 1. Reranker : Model Training Juypter Notebook for KAG Component - Triplet Reranker
-* Need Triplet Reranker Model to Construct KAG
+ 
+**Using Triplet Reranker and KG Retrieval to Construct KAG**
+
 2. KAG : Model Training Juypter Notebook for KAG
 
 
