@@ -44,7 +44,7 @@ The script will:
 Preprocess the MCQ and Sciq data by running
 ```
 python preprocess_mcq.py -p <num_processes>
-python preprocess_mcq.py -p <num_processes>
+python preprocess_sciq.py -p <num_processes>
 ```
 The script will:
 * Identify all mentioned concepts in the questions and answers
