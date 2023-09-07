@@ -33,3 +33,13 @@ rm -r "data/sciq/__MACOSX"
 # create output folders
 mkdir -p data/sciq/grounded/
 mkdir -p data/sciq/modeling/
+
+
+# create output predictions folders
+mkdir -p predictions/
+mkdir -p predictions/mcq/
+mkdir -p predictions/sciq/
+mkdir -p predictions/mcq/bart
+mkdir -p predictions/sciq/bart
+mkdir -p predictions/mcq/t5
+mkdir -p predictions/sciq/t5

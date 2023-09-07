@@ -48,9 +48,9 @@ input_paths = {
             'test':'./data/mcq/grounded/test.grounded.json'
         },
         'candidate_set':{
-            'generate_lm':{
-                'train':'./data/mcq/candidate_set/generate_lm/train.candidate.json',
-                'test':'./data/mcq/candidate_set/generate_lm/test.candidate.json'
+            'generative_lm':{
+                'train':'./data/mcq/candidate_set/generative_lm/train.candidate.json',
+                'test':'./data/mcq/candidate_set/generative_lm/test.candidate.json'
             }
         }
     },
@@ -61,10 +61,10 @@ input_paths = {
             'test':'./data/sciq/grounded/test.grounded.json'
         },
         'candidate_set':{
-            'generate_lm':{
-                'train':'./data/sciq/candidate_set/generate_lm/train.candidate.json',
-                'dev': './data/sciq/candidate_set/generate_lm/valid.candidate.json',
-                'test':'./data/sciq/candidate_set/generate_lm/test.candidate.json'
+            'generative_lm':{
+                'train':'./data/sciq/candidate_set/generative_lm/train.candidate.json',
+                'dev': './data/sciq/candidate_set/generative_lm/valid.candidate.json',
+                'test':'./data/sciq/candidate_set/generative_lm/test.candidate.json'
             }
         }
     }
@@ -73,37 +73,27 @@ input_paths = {
 output_paths = {
     'mcq': {
         'triplets':{
-            'generate_lm':{
-                'train':'./data/mcq/triplets/generate_lm/train.triplet.json',
-                'test':'./data/mcq/triplets/generate_lm/test.triplet.json'
+            'generative_lm':{
+                'train':'./data/mcq/triplets/generative_lm/train.triplet.json',
+                'test':'./data/mcq/triplets/generative_lm/test.triplet.json'
             },
             'masked_lm':{
                 'train':'./data/mcq/triplets/masked_lm/train.triplet.json',
                 'test':'./data/mcq/triplets/masked_lm/test.triplet.json'
             },
-            'generate_masked_lm':{
-                'train':'./data/mcq/triplets/generate_masked_lm/train.triplet.json',
-                'test':'./data/mcq/triplets/generate_masked_lm/test.triplet.json'
+            'generative_masked_lm':{
+                'train':'./data/mcq/triplets/generative_masked_lm/train.triplet.json',
+                'test':'./data/mcq/triplets/generative_masked_lm/test.triplet.json'
             },
         }
     },
     'sciq': {
         'triplets':{
-            'generate_lm':{
-                'train':'./data/sciq/triplets/generate_lm/train.triplet.json',
-                'dev': './data/sciq/triplets/generate_lm/valid.triplet.json',
-                'test':'./data/sciq/triplets/generate_lm/test.triplet.json'
+            'generative_lm':{
+                'train':'./data/sciq/triplets/generative_lm/train.triplet.json',
+                'dev': './data/sciq/triplets/generative_lm/valid.triplet.json',
+                'test':'./data/sciq/triplets/generative_lm/test.triplet.json'
             },
-            'masked_lm':{
-                'train':'./data/sciq/triplets/masked_lm/train.triplet.json',
-                'dev': './data/sciq/triplets/masked_lm/valid.triplet.json',
-                'test':'./data/sciq/triplets/masked_lm/test.triplet.json'
-            },
-            'generate_masked_lm':{
-                'train':'./data/sciq/triplets/generate_masked_lm/train.triplet.json',
-                'dev': './data/sciq/triplets/generate_masked_lm/valid.triplet.json',
-                'test':'./data/sciq/triplets/generate_masked_lm/test.triplet.json'
-            }
         }
     }
 }
@@ -332,7 +322,7 @@ def retrieve_triplet_from_KG_masked_lm(grounded_path, output_path):
     print(f'data saved to {output_path}')
 
 
-def retrieve_triplet_from_KG_masked_generate_lm(grounded_path, candidate_path, output_path):
+def retrieve_triplet_from_KG_masked_generative_lm(grounded_path, candidate_path, output_path):
     
     qa_data = []
     with open(grounded_path, 'r', encoding='utf-8') as fin_ground:
@@ -404,20 +394,20 @@ def main():
 
 
     # MCQ Retrieving
-    print(f'retrieving train dataset triplet (generate_lm) from KG: \n')
-    retrieve_triplet_from_KG_generative_lm(input_paths['mcq']['grounded']['train'], input_paths['mcq']['candidate_set']['generate_lm']['train'], output_paths['mcq']['triplets']['generate_lm']['train'])
-    print(f'retrieving test dataset triplet (generate_lm) from KG: \n')
-    retrieve_triplet_from_KG_generative_lm(input_paths['mcq']['grounded']['test'], input_paths['mcq']['candidate_set']['generate_lm']['test'], output_paths['mcq']['triplets']['generate_lm']['test'])
+    print(f'retrieving train dataset triplet (generative_lm) from KG: \n')
+    retrieve_triplet_from_KG_generative_lm(input_paths['mcq']['grounded']['train'], input_paths['mcq']['candidate_set']['generative_lm']['train'], output_paths['mcq']['triplets']['generative_lm']['train'])
+    print(f'retrieving test dataset triplet (generative_lm) from KG: \n')
+    retrieve_triplet_from_KG_generative_lm(input_paths['mcq']['grounded']['test'], input_paths['mcq']['candidate_set']['generative_lm']['test'], output_paths['mcq']['triplets']['generative_lm']['test'])
 
     print(f'retrieving train dataset triplet (masked_lm) from KG: \n')
     retrieve_triplet_from_KG_masked_lm(input_paths['mcq']['grounded']['train'], output_paths['mcq']['triplets']['masked_lm']['train'])
     print(f'retrieving test dataset triplet (masked_lm) from KG: \n')
     retrieve_triplet_from_KG_masked_lm(input_paths['mcq']['grounded']['test'], output_paths['mcq']['triplets']['masked_lm']['test'])
 
-    print(f'retrieving train dataset triplet (masked_lm + generate_lm) from KG: \n')
-    retrieve_triplet_from_KG_masked_generate_lm(input_paths['mcq']['grounded']['train'], input_paths['mcq']['candidate_set']['generate_lm']['train'], output_paths['mcq']['triplets']['generate_masked_lm']['train'])
-    print(f'retrieving test dataset triplet (masked_lm + generate_lm) from KG: \n')
-    retrieve_triplet_from_KG_masked_generate_lm(input_paths['mcq']['grounded']['test'], input_paths['mcq']['candidate_set']['generate_lm']['test'], output_paths['mcq']['triplets']['generate_masked_lm']['test'])
+    print(f'retrieving train dataset triplet (masked_lm + generative_lm) from KG: \n')
+    retrieve_triplet_from_KG_masked_generative_lm(input_paths['mcq']['grounded']['train'], input_paths['mcq']['candidate_set']['generative_lm']['train'], output_paths['mcq']['triplets']['generative_masked_lm']['train'])
+    print(f'retrieving test dataset triplet (masked_lm + generative_lm) from KG: \n')
+    retrieve_triplet_from_KG_masked_generative_lm(input_paths['mcq']['grounded']['test'], input_paths['mcq']['candidate_set']['generative_lm']['test'], output_paths['mcq']['triplets']['generative_masked_lm']['test'])
     
 
 if __name__ == '__main__':
